@@ -1,0 +1,144 @@
+GRAMMAR AND TRANSLATION SCHEME:
+
+// functions                     --> function functions | ^
+
+// function                      --> ID CLN vartype FPASN FUNCTION {function.Name = id.lex ,function.line = lineNo)} ( params ) { statements }
+// function                          VAR CLN vartype gvarasnleftfact
+// function                          CMT
+
+// gvarasnleftfact               --> ASN exp SCLN | SCLN
+ 
+// params                        --> param params | ^                        
+ 
+// param                         --> VAR CLN vartype multiparamcomma
+ 
+// multiparamcomma               --> CMA param | ^
+ 
+// statements                    --> statement statements | ^
+
+/*
+   statement                     --> IF OPTS exp relationaloperator exp CPTS { statement.ifStart = lineNO
+                                                                               emit("if " + id.lex + " " + ro + " " + id.lex + " goto")
+                                                                               statement.elseStart = lineNO
+                                                                               emit("goto") } THEN {backPatch(statement.ifStart,to_string(lineNo)) }
+                                                          SBL statements CBL { ifconditionleftfact.s = statement.elseStart } ifconditionleftfact
+   statement                         VAR varasnleftfact {statement.s = varasnleftfact.s}
+   statement                         DO UNTIL OPTS exp relationaloperator exp CPTS { statement.ifStart = lineNO
+                                                                                     emit("if " + id.lex + " " + ro + " " + id.lex + " goto")
+                                                                                     statement.elseStart = lineNO
+                                                                                     emit("goto")
+                                                                                     backPatch(statement.ifStart,to_string(lineNo))
+                                                                                     statement.loopIf = lineNo;
+                                                                                     emit("goto");
+                                                                                     backPatch(loopIf,to_string(ifStart));
+                                                                                     backPatch(elseStart,to_string(lineNo)) } { statements }
+   statement                         DISPLAY CLN displayleftfact { statement.s = displayleftfact.s }
+   statement                         DISPLAYLINE CLN displaylineleftfact { statement.s = displaylineleftfact.s }
+   statement                         DQSTR CLN READ CLN VAR SCLN { emit("out " + DQSTR.lex)
+                                                                   emit("in " + VAR.lex) }
+   statement                         CMT
+   statement                         RETURN CLN exp SCLN comment { statement.ret = exp.s }
+*/
+
+// comment                       --> CMT | ^
+
+// relationaloperator            --> EQL | NEQ | LTN | LTE | GTR | GTE
+
+// ifconditionleftfact           --> ELSE elsecondtionleftfact { ifconditionleftfact.elseSkip = lineNo
+//                                                               emit("goto")
+//                                                               backPatch(ifconditionleftfact.elseSkip,to_string(lineNo)) }
+//   
+
+// elsecondtitionleftfact        --> IF OPTS exp relationaloperator exp CPTS { elsecondtitionleftfact.ifStart = lineNO
+//                                                                             emit("if " + id.lex + " " + ro + " " + id.lex + " goto")
+//                                                                             elsecondtitionleftfact.elseStart = lineNO
+//                                                                             emit("goto") } THEN {backPatch(elsecondtitionleftfactifStart,to_string(lineNo)) }
+//                                                        SBL statements CBL { ifconditionleftfact.s = elsecondtitionleftfact.elseStart } ifconditionleftfact
+// elsecondtitionleftfact            SBL statements CBL
+
+// varasnleftfact                --> CLN vartype  asnleftfact { varasnleftfact.s = asnleftfact.s }
+// varasnleftfact                    ASN exp SCLN { varasnleftfact.s = exp.s }
+
+// asnleftfact                   --> ASN asnvalueleftfact { asnleftfact.s = asnvalueleftfact.s }
+// asnleftfact                       SCLN
+
+// asnvalueleftfact              --> EXECUTE CLN ID OPTS expoccurences CPTS SCLN { tmp = tempGen()
+//                                                                                 emit("call " + id.lex + id.finfFunc(id.lex) + " , " + tmp)
+//                                                                                 asnvalueleftfact.v = tmp }
+// asnvalueleftfact                  exp SCLN { asnvalueleftfact.v = exp.v }
+
+// expoccurences                 --> expoccurence expoccurences | ^
+
+// expoccurence                  --> exp multiexpcomma { emit("param " + exp.s + multiexpcomma.s) }
+
+// multiexpcomma                 --> CMA expoccurence | ^
+
+// vartype                       --> INT | CHAR | FLOAT
+
+// displayleftfact               --> DQSTR SCLN { displayleftfact.s = DQSTR.lex } //DQSTR = Double Quoted String
+// displayleftfact                   SQSTR SCLN { displayleftfact.s = SQSTR.lex } //SQSTR = Single Quoted String
+// displayleftfact                   VAR CMA DQSTR SCLN { emit("out " + VAR.lex);
+//                                                        displayleftfact.s = displaylineleftfact.s }
+
+// displaylineleftfact           --> DQSTR SCLN { displaylineleftfact.s = DQSTR.lex }
+// displaylineleftfact               SQSTR SCLN { displaylineleftfact.s = SQSTR.lex }
+
+// exp                           --> lowpre { exp1.i = lowpre.v }
+                                     exp1 { exp.v = exp1.v }
+
+// exp1                          --> ADD lowpre exp1 { exp1.s = " + " + lowpre.s }
+// exp1                              SBT lowpre exp1 { exp1.s = " - " + lowpre.s }
+// exp1                                  ^ { exp1.s = "" } //null string
+
+// lowpre                        --> highpre lowpre1 { lowpre.v = highpre.s + lowpre1.s }
+
+// lowpre1                       --> MUL highpre lowpre1 { lowpre1.s = " * " + highpre.s }
+// lowpre1                           DIV highpre lowpre1 { lowpre1.s = " / " + highpre.s }
+// lowpre1                           MOD highpre lowpre1 { lowpre1.s = " % " + highpre.s }
+// lowpre1                               ^ { exp1.s = "" } //null string
+
+// highpre                       --> VAR { highpre.s = VAR.lex }
+// highpre                           NUM { highpre.s = NUM.lex }
+// highpre                           OPTS exp CPTS { highpre.s = exp.s }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////-Alternative Possible Translation Scheme for Expression-////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// exp                           --> lowpre { exp1.i = lowpre.v }
+                                     exp1 { exp.v = exp1.v }
+
+// exp1                          -->  ADD lowpre { t = newTemp(); 
+                                                   emit(t," = ", exp.i, " + ", lowpre.v);
+                                                   exp1.i = t }
+                                      exp1 { exp.v = exp1.v }
+// exp1	                        -->  SBT lowpre { t = newTemp(); 
+                                                   emit(t," = ", exp.i, " - ", lowpre.v);
+                                                   exp1.i = t }
+// exp1                               exp1 { exp.v = exp1.v }
+// exp1	                             ^ { exp.v = exp.i }
+                      
+// lowpre                        -->  highpre { highpre.i = lowpre1.v }
+                                      lowpre1 { lowpre.v = highpre.v }
+                       
+// lowpre1	                     -->  MUL highpre { t = newTemp();
+                                                    emit(t," = ", highpre.i, " * ", lowpre1.v);
+                                                    lowpre1.i = t }
+                                      lowpre1 { highpre.v = highpre(1).v }
+// lowpre1	                     -->  DIV highpre { t = newTemp();
+                                                    emit(t," = ", highpre.i, " / ", lowpre1.v);
+                                                    lowpre1.i = t }
+                                      lowpre1  { highpre.v = highpre(1).v }
+// lowpre1	                     -->  MOD highpre { t = newTemp();
+                                                    emit(t," = ", highpre.i, " % ", lowpre1.v);
+                                                    lowpre1.i = t }
+                                      lowpre1  {highpre.v = highpre(1).v }
+// lowpre1	                          ^ { highpre.v = highpre.i }
+                                          
+// highpre	                     -->  ID {highpre.v = ID.lex}
+// highpre                            Num {highpre.v = toInt(NUM.lex)} 
+// highpre                            ( exp )
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////-Alternative Possible Translation Scheme for Expression-////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

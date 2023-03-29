@@ -1,0 +1,43 @@
+END_OF_FILE,
+ERROR,
+FUNCTION,      //KEYWORD
+INT,           //KEYWORD
+CHAR,          //KEYWORD
+FLOAT,         //KEYWORD
+IF,            //KEYWORD
+ELSE,          //KEYWORD
+DO,            //KEYWORD
+UNTIL,         //KEYWORD
+THEN,          //KEYWORD
+READ,          //KEYWORD
+DISPLAY,       //KEYWORD
+DISPLAYLINE,   //KEYWORD
+RETURN,        //KEYWORD
+EXECUTE,       //KEYWORD
+NUM,           //NUMERIC
+ID,            //IDENTIFIER
+VAR,           //VARIABLE
+CMA,           //COMMA
+CLN,           //COLON
+SCLN,          //SEMI COLON
+DLR,           //DOLLAR
+OPTS,          //OPENING PARENTHESIS
+CPTS,          //CLOSING PARENTHESIS
+ADD,           //ADD
+SBT,           //SUBTRACT
+MUL,           //MULTIPLY
+DIV,           //DIVIDE
+MOD,           //MODULUS
+SBL,           //START OF BLOCK
+CBL,           //END OF BLOCK
+ASN,           //ASSIGNMENT
+FPASN,         //FUNCTION POINTER ASSIGNMENT OPERATOR
+EQL,           //EQUAL TO
+NEQ,           //NOT EQUAL TO
+LTN,           //LESS THAN
+LTE,           //LESS THAN EQUAL TO
+GTR,           //GREATER THAN
+GTE,           //GREATER THAN EQUAL TO
+CMT,           //COMMENT
+DQSTR,         //DOUBLE QUOTATION STRING
+SQSTR          //SINGLE QUOTATION STRING
